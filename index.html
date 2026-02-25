@@ -3,38 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winod Infospace | AI Creative Studio</title>
+<title>Winod Infospace | AI Ads & Digital Marketing</title>
 
 <style>
-:root {
-  --primary: #7F00FF;
-  --secondary: #00BFFF;
-  --dark: #0E0E14;
-  --card: #15151c;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
 body {
-  background: var(--dark);
-  color: #fff;
-  line-height: 1.6;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0E0E14;
+  color: white;
+  text-align: center;
 }
 
-/* Navigation */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 8%;
+.hero {
+  padding: 120px 20px 80px;
+}
+
+.logo-box {
+  display: inline-block;
+  padding: 25px;
   background: #111118;
-  position: sticky;
-  top: 0;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(127,0,255,0.6);
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 180px;
+  max-width: 70%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 48px;
+  background: linear-gradient(90deg,#00BFFF,#7F00FF);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+
+.tagline {
+  opacity: 0.85;
+  margin-bottom: 30px;
+  font-size: 18px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 15px 35px;
+  border-radius: 30px;
+  background: linear-gradient(90deg,#00BFFF,#7F00FF);
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.services {
+  padding: 80px 10%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.card {
+  background: #15151c;
+  padding: 30px;
+  border-radius: 15px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 30px rgba(127,0,255,0.3);
+}
+
+.card h3 {
+  margin-bottom: 15px;
+}
+
+.card p {
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+footer {
+  padding: 40px;
+  background: #0E0E14;
+  font-size: 14px;
+  opacity: 0.6;
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+  <div class="logo-box">
+    <img src="winod-logo.png" class="logo" alt="Winod Infospace Logo">
+  </div>
+
+  <h1>Winod Infospace</h1>
+  <p class="tagline">AI Ads • Digital Marketing • Website & App Development</p>
+
+  <a href="tel:9742860933" class="btn">Call Now</a>
+</section>
+
+<section class="services">
+
+  <div class="card">
+    <h3>AI Advertisements</h3>
+    <p>High converting AI powered video ads, animated campaigns and cinematic brand storytelling.</p>
+  </div>
+
+  <div class="card">
+    <h3>Digital Marketing</h3>
+    <p>Social media growth strategy across all major platforms, paid advertising, branding systems and performance driven content.</p>
+  </div>
+
+  <div class="card">
+    <h3>Web & App Development</h3>
+    <p>Professional websites and scalable digital platforms built for performance, speed and trust.</p>
+  </div>
+
+</section>
+
+<footer>
+  Email: winodinfospace@gmail.com | Phone: 9742860933
+</footer>
+
+</body>
+</html>  top: 0;
 }
 
 .navbar h2 {
