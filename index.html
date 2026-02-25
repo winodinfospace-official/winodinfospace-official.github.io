@@ -3,9 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winod Infospace</title>
+<title>Winod Infospace | AI Creative Studio</title>
 
 <style>
+:root {
+  --primary: #7F00FF;
+  --secondary: #00BFFF;
+  --dark: #0E0E14;
+  --card: #15151c;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -14,17 +21,20 @@
 }
 
 body {
-  background: #0E0E14;
-  color: white;
+  background: var(--dark);
+  color: #fff;
+  line-height: 1.6;
 }
 
-/* Navbar */
+/* Navigation */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 10%;
+  padding: 20px 8%;
   background: #111118;
+  position: sticky;
+  top: 0;
 }
 
 .navbar h2 {
@@ -33,8 +43,148 @@ body {
 }
 
 .navbar a {
+  text-decoration: none;
+  color: white;
+  margin-left: 25px;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.navbar a:hover {
+  color: var(--secondary);
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.hero-logo {
+  width: 150px;
+  height: auto;
+  border-radius: 50%;
+  margin-bottom: 30px;
+  box-shadow: 0 0 35px rgba(255,215,0,0.4);
+}
+
+.hero h1 {
+  font-size: 48px;
+  background: linear-gradient(90deg,var(--secondary),var(--primary));
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  opacity: 0.85;
+  margin-bottom: 35px;
+  font-size: 18px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 30px;
+  background: linear-gradient(90deg,var(--secondary),var(--primary));
   color: white;
   text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
+}
+
+/* Services */
+.services {
+  padding: 100px 8%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 35px;
+}
+
+.card {
+  background: var(--card);
+  padding: 35px;
+  border-radius: 18px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 30px rgba(127,0,255,0.4);
+}
+
+.card h3 {
+  margin-bottom: 15px;
+  color: var(--secondary);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 40px;
+  background: #111118;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 60px;
+}
+
+/* Responsive */
+@media(max-width:768px) {
+  .hero h1 {
+    font-size: 36px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <h2>Winod Infospace</h2>
+  <div>
+    <a href="#">Home</a>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+  </div>
+</div>
+
+<section class="hero">
+  <img src="winod-logo.png" class="hero-logo">
+  <h1>AI-Powered Digital Growth</h1>
+  <p>AI Ads • Digital Marketing • Website & App Development</p>
+  <a href="tel:9742860933" class="btn">Book Strategy Call</a>
+</section>
+
+<section class="services" id="services">
+  <div class="card">
+    <h3>AI Advertisements</h3>
+    <p>High-converting AI video ads, product visualization and automation systems.</p>
+  </div>
+
+  <div class="card">
+    <h3>Digital Marketing</h3>
+    <p>Instagram growth, branding strategy, paid campaigns and performance marketing.</p>
+  </div>
+
+  <div class="card">
+    <h3>Web & App Development</h3>
+    <p>Professional websites and scalable applications for businesses of all sizes.</p>
+  </div>
+</section>
+
+<footer id="contact">
+  Email: winodinfospace@gmail.com | Phone: 9742860933  
+  <br><br>
+  © 2026 Winod Infospace. All Rights Reserved.
+</footer>
+
+</body>
+</html>  text-decoration: none;
   margin-left: 20px;
   font-size: 14px;
 }
