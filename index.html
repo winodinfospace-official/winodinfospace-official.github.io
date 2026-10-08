@@ -175,31 +175,455 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
   footer{flex-direction:column;text-align:center;}
 }
 </style>
+<style id="enhance">
+
+/* ══════════════════════════════════════════════════════════════
+   UI ENHANCEMENT LAYER — animations, micro-interactions, depth
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --ease:cubic-bezier(.22,1,.36,1);
+  --ease-soft:cubic-bezier(.4,0,.2,1);
+  --glass:rgba(13,13,13,.72);
+}
+html{scroll-padding-top:96px;}
+body{cursor:auto;}
+::selection{background:rgba(201,168,76,.28);color:#fff;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:9px;}
+::-webkit-scrollbar-track{background:#08080a;}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--gold-dim),#3a2f14);border-radius:9px;}
+::-webkit-scrollbar-thumb:hover{background:var(--gold);}
+
+/* ─── PRELOADER ─── */
+.pl{position:fixed;inset:0;z-index:9999;background:#070707;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:30px;transition:opacity .8s var(--ease),visibility .8s;}
+.pl.done{opacity:0;visibility:hidden;}
+.pl::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(201,168,76,.09),transparent 62%);}
+.pl-mark{width:104px;height:104px;position:relative;}
+.pl-mark svg{width:100%;height:100%;overflow:visible;}
+.pl-mark path{fill:none;stroke:var(--gold);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(201,168,76,.5));}
+.pl-diamond{stroke-dasharray:249;stroke-dashoffset:249;animation:plDraw 1.5s var(--ease) forwards;}
+.pl-w{stroke-dasharray:122;stroke-dashoffset:122;animation:plDraw 1.1s var(--ease) .45s forwards;}
+@keyframes plDraw{to{stroke-dashoffset:0;}}
+.pl-mark::after{content:'';position:absolute;inset:14%;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,168,76,.22),transparent 68%);animation:plPulse 2.6s ease-in-out infinite;}
+@keyframes plPulse{0%,100%{opacity:.25;transform:scale(.9);}50%{opacity:.7;transform:scale(1.06);}}
+.pl-word{display:flex;gap:8px;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:5px;color:var(--muted);}
+.pl-word span{opacity:0;transform:translateY(9px);animation:plLetter .7s var(--ease) forwards;animation-delay:calc(.5s + var(--i)*.055s);}
+@keyframes plLetter{to{opacity:1;transform:none;}}
+.pl-bar{width:168px;height:1px;background:rgba(201,168,76,.16);overflow:hidden;position:relative;}
+.pl-bar i{position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light));transform:scaleX(0);transform-origin:left;animation:plBar 1.7s var(--ease) .2s forwards;}
+@keyframes plBar{to{transform:scaleX(1);}}
+
+/* ─── SCROLL PROGRESS ─── */
+.sp{position:fixed;top:0;left:0;right:0;height:2px;z-index:300;background:transparent;pointer-events:none;}
+.sp i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-light));
+  box-shadow:0 0 14px rgba(201,168,76,.55);}
+
+/* ─── CURSOR ─── */
+.c-dot,.c-ring{position:fixed;top:0;left:0;z-index:10001;pointer-events:none;border-radius:50%;
+  will-change:transform;opacity:0;transition:opacity .3s;}
+.c-dot{width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--gold-light);box-shadow:0 0 12px rgba(201,168,76,.9);}
+.c-ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1px solid rgba(201,168,76,.4);
+  transition:opacity .3s,width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),border-color .35s,background .35s;}
+html.cursor-on .c-dot,html.cursor-on .c-ring{opacity:1;}
+html.cursor-on,html.cursor-on a,html.cursor-on button,html.cursor-on .port-card,html.cursor-on .tool-card,
+html.cursor-on .srv-card,html.cursor-on .test-card,html.cursor-on .nav-logo,html.cursor-on .f-links a{cursor:none;}
+html.cursor-on input,html.cursor-on textarea{cursor:text;}
+.c-ring.big{width:64px;height:64px;margin:-32px 0 0 -32px;border-color:rgba(201,168,76,.75);background:rgba(201,168,76,.07);}
+.c-dot.big{opacity:0;}
+
+/* ─── NAV ─── */
+nav{transition:padding .45s var(--ease),background .45s,backdrop-filter .45s,border-color .45s;border-bottom:1px solid transparent;}
+nav.small{padding:12px 6vw;background:rgba(7,7,7,.82);backdrop-filter:blur(14px) saturate(140%);border-bottom-color:rgba(201,168,76,.12);}
+.nav-logo{transition:letter-spacing .45s var(--ease),color .3s;position:relative;}
+nav.small .nav-logo{letter-spacing:5px;}
+.nav-links a{position:relative;}
+.nav-links a::after{content:'';position:absolute;left:0;right:0;bottom:-7px;height:1px;background:var(--gold);
+  transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease);}
+.nav-links a:hover::after,.nav-links a.current::after{transform:scaleX(1);}
+.nav-links a.current{color:var(--gold-light);}
+.nav-cta{z-index:0;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-dim);color:var(--gold);
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;text-decoration:none;
+  transition:.4s var(--ease);position:relative;overflow:hidden;}
+.nav-cta:hover{color:#070707;border-color:var(--gold);}
+.nav-cta::before{content:'';position:absolute;inset:0;background:var(--gold);transform:translateY(101%);transition:transform .45s var(--ease);z-index:-1;}
+.nav-cta:hover::before{transform:translateY(0);}
+.nav-cta span{position:relative;}
+.nav-right{display:flex;align-items:center;gap:26px;}
+
+.burger{display:none;width:40px;height:40px;background:none;border:1px solid rgba(201,168,76,.25);
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.35s;}
+.burger:hover{border-color:var(--gold);background:rgba(201,168,76,.07);}
+.burger i{display:block;width:17px;height:1px;background:var(--gold);transition:.4s var(--ease);}
+.burger.open i:nth-child(1){transform:translateY(6px) rotate(45deg);}
+.burger.open i:nth-child(2){opacity:0;transform:scaleX(.2);}
+.burger.open i:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+.mmenu{position:fixed;inset:0;z-index:99;background:rgba(7,7,7,.96);backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;justify-content:center;padding:96px 8vw 40px;visibility:hidden;opacity:0;
+  transition:opacity .5s var(--ease),visibility .5s;overflow-y:auto;}
+.mmenu.open{visibility:visible;opacity:1;}
+.mmenu::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 15%,rgba(201,168,76,.1),transparent 55%);pointer-events:none;}
+.mmenu a{position:relative;font-family:'Cormorant Garamond',serif;font-size:clamp(30px,7vw,44px);font-weight:300;
+  color:var(--white);text-decoration:none;padding:14px 0;border-bottom:1px solid rgba(201,168,76,.12);
+  display:flex;align-items:baseline;gap:16px;opacity:0;transform:translateY(28px);
+  transition:opacity .55s var(--ease),transform .55s var(--ease),color .3s,padding-left .45s var(--ease);
+  transition-delay:var(--d,0ms);}
+.mmenu a em{font-style:normal;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2px;color:var(--gold-dim);}
+.mmenu a:hover,.mmenu a:active{color:var(--gold);padding-left:12px;}
+.mmenu.open a{opacity:1;transform:none;}
+.mmenu-foot{margin-top:38px;display:flex;flex-wrap:wrap;gap:10px;opacity:0;transition:opacity .7s .4s;position:relative;}
+.mmenu.open .mmenu-foot{opacity:1;}
+.mmenu-foot a{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  border:1px solid rgba(201,168,76,.25);padding:9px 14px;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.25);}
+
+/* ─── HERO ─── */
+.hero-grid{transition:transform .8s var(--ease-soft);}
+.hero-bg{transition:transform 1s var(--ease-soft);}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none;z-index:1;}
+.orb-1{width:46vw;height:46vw;max-width:620px;max-height:620px;top:-8%;right:-6%;
+  background:radial-gradient(circle,rgba(201,168,76,.3),transparent 66%);animation:drift1 22s ease-in-out infinite;}
+.orb-2{width:38vw;height:38vw;max-width:520px;max-height:520px;bottom:-12%;left:-10%;
+  background:radial-gradient(circle,rgba(30,90,190,.24),transparent 66%);animation:drift2 27s ease-in-out infinite;}
+@keyframes drift1{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(-6%,7%,0) scale(1.12);}}
+@keyframes drift2{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(8%,-6%,0) scale(1.15);}}
+#fx{position:absolute;inset:0;z-index:2;pointer-events:none;}
+.hero-inner{z-index:3;}
+
+.hero-line{transform-origin:top;transform:scaleY(0);transition:transform 1s var(--ease) .1s;}
+#hero.ready .hero-line{transform:scaleY(1);}
+.hero-tag{opacity:0;transform:translateY(14px);transition:opacity .8s var(--ease) .35s,transform .8s var(--ease) .35s;}
+#hero.ready .hero-tag{opacity:1;transform:none;}
+.hero-sub{opacity:0;transform:translateY(14px);transition:opacity .9s var(--ease) 1s,transform .9s var(--ease) 1s;}
+#hero.ready .hero-sub{opacity:1;transform:none;}
+.hero-btns{opacity:0;transform:translateY(16px);transition:opacity .9s var(--ease) 1.15s,transform .9s var(--ease) 1.15s;}
+#hero.ready .hero-btns{opacity:1;transform:none;}
+.hero-scroll{opacity:0;transition:opacity 1s 1.6s;animation:bounce 2.4s infinite;}
+#hero.ready .hero-scroll{opacity:1;}
+.hero-scroll{position:absolute;}
+.hero-scroll::before{content:'';position:absolute;top:-46px;left:50%;width:1px;height:34px;background:linear-gradient(to bottom,transparent,var(--gold-dim));}
+.hero-title{margin-bottom:4px;}
+.hero-title em,.sec-title em{
+  background:linear-gradient(100deg,var(--gold-dim) 0%,var(--gold) 22%,#fff3cf 42%,var(--gold) 62%,var(--gold-dim) 100%);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 8s linear infinite;}
+@keyframes shimmer{0%{background-position:160% 0;}100%{background-position:-160% 0;}}
+.hero-title::after{content:'';display:block;width:0;height:1px;margin-top:28px;
+  background:linear-gradient(90deg,var(--gold),transparent);transition:width 1.6s var(--ease) .8s;}
+#hero.ready .hero-title::after{width:min(340px,60%);}
+
+/* word-mask reveal */
+.w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.14em;margin-bottom:-.14em;}
+.wi{display:inline-block;transform:translateY(135%) rotate(4deg);opacity:0;
+  transition:transform 1.05s var(--ease),opacity .85s ease;transition-delay:calc(var(--i,0)*72ms);}
+.on .wi,.ready .wi{transform:none;opacity:1;}
+
+/* ─── MARQUEE ─── */
+.marquee{position:relative;overflow:hidden;padding:24px 0;}
+.marquee-track{display:flex;width:max-content;will-change:transform;animation:mq var(--spd,34s) linear infinite;}
+.marquee.rev .marquee-track{animation-direction:reverse;}
+.marquee:hover .marquee-track{animation-play-state:paused;}
+@keyframes mq{to{transform:translateX(-50%);}}
+@keyframes mq3{to{transform:translateX(-33.3333%);}}
+@keyframes mq4{to{transform:translateX(-25%);}}
+.marquee.third .marquee-track{animation-name:mq3;}
+.marquee.quarter .marquee-track{animation-name:mq4;}
+.marquee::before,.marquee::after{content:'';position:absolute;top:0;bottom:0;width:14vw;z-index:2;pointer-events:none;}
+.marquee::before{left:0;background:linear-gradient(to right,var(--bg),transparent);}
+.marquee::after{right:0;background:linear-gradient(to left,var(--bg),transparent);}
+.m-item{display:flex;align-items:center;gap:24px;padding:0 24px;white-space:nowrap;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
+.m-item b{color:var(--gold);font-weight:400;}
+.hero-mq{border-top:1px solid rgba(201,168,76,.12);border-bottom:1px solid rgba(201,168,76,.12);
+  background:linear-gradient(90deg,rgba(201,168,76,.035),transparent 55%);margin-top:-1px;}
+
+/* ─── DIVIDER + SECTION HEADINGS ─── */
+.divider{position:relative;overflow:hidden;}
+.divider::after{content:'';position:absolute;top:-1px;left:0;width:150px;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);filter:blur(.5px);
+  animation:travel 9s var(--ease) infinite;}
+@keyframes travel{0%{transform:translateX(-160px);opacity:0;}10%{opacity:1;}85%{opacity:1;}100%{transform:translateX(100vw);opacity:0;}}
+.sec-tag::before{width:0;transition:width 1s var(--ease) .15s;}
+.fade.on .sec-tag::before,.sec-tag.on::before,#hero.ready .sec-tag::before{width:40px;}
+.sec-title{margin-bottom:26px;}
+
+/* ─── REVEAL SYSTEM ─── */
+.fade{opacity:0;transform:translateY(42px);
+  transition:opacity 1s var(--ease),transform 1s var(--ease);transition-delay:var(--d,0ms);}
+.fade.on{opacity:1;transform:none;}
+.fade[data-rv="left"]{transform:translateX(-52px);}
+.fade[data-rv="right"]{transform:translateX(52px);}
+.fade[data-rv="scale"]{transform:scale(.94) translateY(24px);}
+.fade[data-rv="clip"]{clip-path:inset(0 0 100% 0);opacity:1;transform:none;transition:clip-path 1.2s var(--ease);}
+.fade[data-rv="clip"].on{clip-path:inset(0 0 0 0);}
+.fade[data-rv].on{transform:none;}
+
+/* ─── TILT / SPOTLIGHT CARDS ─── */
+.tilt{transform-style:preserve-3d;will-change:transform;}
+.spot{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);z-index:1;
+  background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,.15),transparent 62%);}
+.tool-card:hover .spot,.srv-card:hover .spot,.port-card:hover .spot,.test-card:hover .spot{opacity:1;}
+
+/* TOOLS */
+.tools-mq{margin-top:34px;}
+.tools-mq .marquee-track{align-items:stretch;}
+.tool-card{min-width:222px;margin-right:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;transition:background .45s var(--ease),transform .45s var(--ease),border-color .45s;}
+.tool-card:hover{transform:translateY(-5px);border-color:rgba(201,168,76,.28);}
+.tool-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(300px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,.14),transparent 60%);}
+.tool-card:hover::before{opacity:1;}
+.tool-icon{transition:transform .55s var(--ease),filter .45s;}
+.tool-card:hover .tool-icon{transform:translateY(-3px) scale(1.16) rotate(-6deg);filter:drop-shadow(0 6px 16px rgba(201,168,76,.45));}
+
+/* SERVICES */
+.srv-card{transition:background .45s var(--ease),border-color .45s,transform .5s var(--ease);}
+.srv-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,.13),transparent 62%);}
+.srv-card:hover::after{opacity:1;}
+.srv-card:hover{border-color:rgba(201,168,76,.24);}
+.srv-num{transition:transform .6s var(--ease),color .5s;}
+.srv-card:hover .srv-num{transform:translateY(-6px) scale(1.06);color:rgba(201,168,76,.16);}
+.srv-icon{transition:transform .5s var(--ease);}
+.srv-card:hover .srv-icon{transform:translateX(4px) scale(1.1);}
+.tag{transition:.35s var(--ease);}
+.srv-card:hover .tag{border-color:rgba(201,168,76,.5);color:var(--gold);}
+
+/* PORTFOLIO */
+.port-card{transition:border-color .4s,box-shadow .5s var(--ease);}
+.port-card::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .45s;
+  background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,.16),transparent 60%);}
+.port-card:hover::after{opacity:1;}
+.port-card:hover{box-shadow:0 26px 60px -30px rgba(0,0,0,.95),0 0 0 1px rgba(201,168,76,.22);}
+.port-img{transition:transform .7s var(--ease),filter .6s;}
+.port-card:hover .port-img{transform:scale(1.07);filter:saturate(1.2);}
+.port-ov{clip-path:circle(0% at 50% 50%);transition:clip-path .6s var(--ease),opacity .3s;opacity:1;}
+.port-card:hover .port-ov,.port-card:focus-visible .port-ov{clip-path:circle(75% at 50% 50%);}
+.port-ov span{transform:scale(.9);transition:transform .5s var(--ease) .05s,background .3s,color .3s;}
+.port-card:hover .port-ov span{transform:scale(1);}
+.port-ov span:hover{background:var(--gold);color:#070707;}
+.port-info{transition:padding-left .45s var(--ease);}
+.port-card:hover .port-info{padding-left:28px;}
+.port-card:focus-visible{outline:1px solid var(--gold);outline-offset:2px;}
+.port-card{cursor:pointer;}
+.port-name::after{content:'';display:block;width:0;height:1px;background:var(--gold);margin-top:8px;transition:width .5s var(--ease);}
+.port-card:hover .port-name::after{width:34px;}
+
+/* TESTIMONIALS */
+.test-card{transition:border-color .4s,transform .5s var(--ease),background .4s;}
+.test-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,.12),transparent 62%);}
+.test-card:hover::after{opacity:1;}
+.test-card:hover{border-color:rgba(201,168,76,.3);background:#14120d;transform:translateY(-4px);}
+.test-av{transition:transform .5s var(--ease),box-shadow .4s;}
+.test-card:hover .test-av{transform:scale(1.08) rotate(-6deg);box-shadow:0 0 0 4px rgba(201,168,76,.1);}
+.stars i{font-style:normal;display:inline-block;opacity:0;transform:scale(.4) translateY(6px);transition:.5s var(--ease);}
+.on .stars i{opacity:1;transform:none;transition-delay:calc(var(--i,0)*70ms + 200ms);}
+
+/* STATS */
+.stat-num{transition:color .4s;}
+.stats:hover .stat-num{color:var(--gold-light);}
+.stat-lbl{transition:letter-spacing .45s var(--ease);}
+.stats > div:hover .stat-lbl{letter-spacing:3px;color:var(--gold);}
+
+/* BUTTONS */
+.btn-gold,.btn-outline{position:relative;overflow:hidden;z-index:0;transform:translateZ(0);}
+.btn-gold::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:1;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-18deg);}
+.btn-gold:hover::after{animation:sheen .85s var(--ease);}
+@keyframes sheen{to{left:130%;}}
+.btn-outline::before{content:'';position:absolute;inset:0;background:var(--gold);transform:translateY(101%);
+  transition:transform .45s var(--ease);z-index:-1;}
+.btn-outline:hover{color:#070707;border-color:var(--gold);}
+.btn-outline:hover::before{transform:translateY(0);}
+
+/* CONTACT */
+.c-input,.c-textarea{transition:border-color .35s,background .35s,box-shadow .35s,transform .35s var(--ease);}
+.c-input:focus,.c-textarea:focus{border-color:var(--gold);background:#151309;box-shadow:0 0 0 3px rgba(201,168,76,.09);transform:translateY(-1px);}
+.c-link{position:relative;}
+.c-link:hover{transform:translateX(4px);}
+.c-link{transition:color .3s,transform .4s var(--ease);}
+.c-icon{transition:all .4s var(--ease);}
+.c-link:hover .c-icon{transform:rotate(-8deg) scale(1.06);}
+.c-form .btn-gold{position:relative;overflow:hidden;}
+.contact-text .sec-tag::before{width:0;}
+.contact-text.fade.on .sec-tag::before{width:40px;}
+
+/* WEBSITES / LINKS */
+a.port-card.port-card{cursor:pointer;}
+
+/* FOOTER */
+footer{position:relative;}
+.f-logo{transition:letter-spacing .5s var(--ease),color .3s;}
+.f-logo:hover{letter-spacing:6px;color:var(--gold-light);}
+.f-links a{position:relative;}
+.f-links a::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--gold-dim);
+  transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);}
+.f-links a:hover::after{transform:scaleX(1);}
+
+/* BACK TO TOP */
+.to-top{position:fixed;right:26px;bottom:26px;width:48px;height:48px;z-index:200;background:rgba(7,7,7,.8);
+  border:1px solid rgba(201,168,76,.25);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  color:var(--gold);font-size:14px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(16px) scale(.9);
+  transition:.5s var(--ease);}
+.to-top.show{opacity:1;visibility:visible;transform:none;}
+.to-top:hover{background:rgba(201,168,76,.14);border-color:var(--gold);transform:translateY(-3px);}
+.to-top svg{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);transform:rotate(-90deg);}
+.to-top circle{fill:none;stroke-width:1.6;}
+.tt-track{stroke:rgba(201,168,76,.13);}
+.tt-prog{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:138.2;stroke-dashoffset:138.2;transition:stroke-dashoffset .2s linear;}
+
+/* ─── VIDEO MODAL ─── */
+.video-modal{display:flex;visibility:hidden;pointer-events:none;background:rgba(5,5,5,.86);
+  backdrop-filter:blur(14px);opacity:0;transition:opacity .45s var(--ease),visibility .45s var(--ease);}
+.video-modal.open{visibility:visible;pointer-events:auto;opacity:1;}
+.video-modal-inner{transform:translateY(26px) scale(.94);transition:transform .55s var(--ease);}
+.video-modal.open .video-modal-inner{transform:none;}
+.video-modal-frame{box-shadow:0 40px 90px -40px rgba(0,0,0,1),0 0 0 1px rgba(201,168,76,.2);}
+.video-modal-close{transition:.35s var(--ease);}
+.video-modal-close:hover{transform:rotate(90deg);}
+body.lock{overflow:hidden;padding-right:var(--sbw,0px);}
+body.lock nav,body.lock nav.small{padding-right:calc(6vw + var(--sbw,0px));}
+
+/* ─── AMBIENT PAGE GLOW ─── */
+.glow-cursor{position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;
+  background:radial-gradient(circle,rgba(201,168,76,.07),transparent 66%);transform:translate(-50%,-50%);mix-blend-mode:screen;}
+@media(max-width:768px){.glow-cursor{display:none;}}
+
+/* ─── RESPONSIVE ADD-ONS ─── */
+@media(max-width:1080px){
+  .nav-links{display:none;}
+  .burger{display:flex;}
+  .nav-cta{display:none;}
+}
+@media(max-width:768px){
+  .pl-mark{width:84px;height:84px;}
+  .to-top{right:16px;bottom:16px;width:42px;height:42px;}
+  .marquee::before,.marquee::after{width:18vw;}
+  .hero-scroll::before{height:26px;top:-38px;}
+}
+
+/* ─── REDUCED MOTION ─── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+  .fade,.fade[data-rv]{opacity:1 !important;transform:none !important;clip-path:none !important;}
+  .wi{opacity:1 !important;transform:none !important;}
+  .c-dot,.c-ring,.glow-cursor{display:none !important;}
+  html.cursor-on,html.cursor-on *{cursor:auto !important;}
+  #fx{display:none;}
+  .marquee-track{animation:none !important;transform:none !important;}
+}
+
+</style>
 </head>
 <body>
+
+<noscript><style>.fade,.fade[data-rv]{opacity:1!important;transform:none!important;clip-path:none!important}
+.wi{opacity:1!important;transform:none!important}.pl{display:none!important}
+.c-dot,.c-ring,.glow-cursor{display:none!important}</style></noscript>
+
+<!-- PRELOADER (self-drawing monogram) -->
+<div class="pl" id="pl" aria-hidden="true">
+  <div class="pl-mark">
+    <svg viewBox="0 0 104 104">
+      <path class="pl-diamond" d="M52 12 L92 52 L52 92 L12 52 Z"/>
+      <path class="pl-w" d="M34 40 L42 68 L52 46 L62 68 L70 40"/>
+    </svg>
+  </div>
+  <div class="pl-word">
+    <span style="--i:0">W</span>
+    <span style="--i:1">I</span>
+    <span style="--i:2">N</span>
+    <span style="--i:3">O</span>
+    <span style="--i:4">D</span>
+    <span style="--i:5;width:14px"></span>
+    <span style="--i:6">I</span>
+    <span style="--i:7">N</span>
+    <span style="--i:8">F</span>
+    <span style="--i:9">O</span>
+    <span style="--i:10">S</span>
+    <span style="--i:11">P</span>
+    <span style="--i:12">A</span>
+    <span style="--i:13">C</span>
+    <span style="--i:14">E</span>
+  </div>
+  <div class="pl-bar"><i></i></div>
+</div>
+<script>
+/* fail-safe: clear the preloader even if a later script errors */
+setTimeout(function(){
+  var p=document.getElementById('pl'); if(p){p.classList.add('done');}
+  var h=document.getElementById('hero'); if(h){h.classList.add('ready');}
+  var f=document.querySelectorAll('.fade'); for(var i=0;i<f.length;i++){f[i].classList.add('on');}
+},4200);
+</script>
+
+<!-- SCROLL PROGRESS -->
+<div class="sp" aria-hidden="true"><i id="spBar"></i></div>
+
+<!-- CURSOR FX -->
+<div class="glow-cursor" id="glow" aria-hidden="true"></div>
+<div class="c-ring" id="cRing" aria-hidden="true"></div>
+<div class="c-dot" id="cDot" aria-hidden="true"></div>
+
+<!-- BACK TO TOP -->
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 48 48" aria-hidden="true">
+    <circle class="tt-track" cx="24" cy="24" r="22"/>
+    <circle class="tt-prog" id="ttProg" cx="24" cy="24" r="22"/>
+  </svg>
+  <span aria-hidden="true">↑</span>
+</button>
+
+
+<!-- MOBILE MENU -->
+<div class="mmenu" id="mMenu">
+  <a href="#about"><em>01</em> About</a>
+  <a href="#tools"><em>02</em> AI Tools</a>
+  <a href="#services"><em>03</em> Services</a>
+  <a href="#portfolio"><em>04</em> Work</a>
+  <a href="#websites"><em>05</em> Websites</a>
+  <a href="#testimonials"><em>06</em> Clients</a>
+  <a href="#contact"><em>07</em> Contact</a>
+  <div class="mmenu-foot">
+    <a href="tel:9742860933">Call</a>
+    <a href="mailto:winodinfospace@gmail.com">Email</a>
+    <a href="https://instagram.com/winodinfospace" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://youtube.com/@winodinfospace" target="_blank" rel="noopener">YouTube</a>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav>
   <a href="#hero" class="nav-logo">WINOD INFOSPACE</a>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#tools">AI Tools</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#portfolio">Work</a></li>
-    <li><a href="#websites">Websites</a></li>
-    <li><a href="#testimonials">Clients</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#tools">AI Tools</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#portfolio">Work</a></li>
+      <li><a href="#websites">Websites</a></li>
+      <li><a href="#testimonials">Clients</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta"><span>Hire Me</span></a>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false"><i></i><i></i><i></i></button>
+  </div>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
   <div class="hero-inner">
     <div class="hero-line"></div>
     <p class="hero-tag"><span class="hero-dot"></span>AI Creative Studio &nbsp;·&nbsp; Bengaluru, India</p>
-    <h1 class="hero-title">Creating With<br/><em>Artificial</em><br/>Intelligence</h1>
+    <h1 class="hero-title" data-split>Creating With<br/><em>Artificial</em><br/>Intelligence</h1>
     <p class="hero-sub">AI Video Ads &nbsp;·&nbsp; AI Content &nbsp;·&nbsp; AI Apps &nbsp;·&nbsp; AI Reels</p>
     <div class="hero-btns">
       <a href="#contact" class="btn-gold">Start a Project</a>
@@ -208,6 +632,44 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
   </div>
   <div class="hero-scroll">SCROLL</div>
 </section>
+
+<!-- KEYWORD STRIP -->
+<div class="marquee hero-mq quarter" style="--spd:38s" aria-hidden="true">
+  <div class="marquee-track">
+      <div class="m-item"><b>◆</b>AI Video Ads</div>
+      <div class="m-item"><b>◆</b>AI Reels</div>
+      <div class="m-item"><b>◆</b>AI Content</div>
+      <div class="m-item"><b>◆</b>AI Apps</div>
+      <div class="m-item"><b>◆</b>Brand Films</div>
+      <div class="m-item"><b>◆</b>AI Voice</div>
+      <div class="m-item"><b>◆</b>Social Media</div>
+      <div class="m-item"><b>◆</b>Post Production</div>
+      <div class="m-item"><b>◆</b>AI Video Ads</div>
+      <div class="m-item"><b>◆</b>AI Reels</div>
+      <div class="m-item"><b>◆</b>AI Content</div>
+      <div class="m-item"><b>◆</b>AI Apps</div>
+      <div class="m-item"><b>◆</b>Brand Films</div>
+      <div class="m-item"><b>◆</b>AI Voice</div>
+      <div class="m-item"><b>◆</b>Social Media</div>
+      <div class="m-item"><b>◆</b>Post Production</div>
+      <div class="m-item"><b>◆</b>AI Video Ads</div>
+      <div class="m-item"><b>◆</b>AI Reels</div>
+      <div class="m-item"><b>◆</b>AI Content</div>
+      <div class="m-item"><b>◆</b>AI Apps</div>
+      <div class="m-item"><b>◆</b>Brand Films</div>
+      <div class="m-item"><b>◆</b>AI Voice</div>
+      <div class="m-item"><b>◆</b>Social Media</div>
+      <div class="m-item"><b>◆</b>Post Production</div>
+      <div class="m-item"><b>◆</b>AI Video Ads</div>
+      <div class="m-item"><b>◆</b>AI Reels</div>
+      <div class="m-item"><b>◆</b>AI Content</div>
+      <div class="m-item"><b>◆</b>AI Apps</div>
+      <div class="m-item"><b>◆</b>Brand Films</div>
+      <div class="m-item"><b>◆</b>AI Voice</div>
+      <div class="m-item"><b>◆</b>Social Media</div>
+      <div class="m-item"><b>◆</b>Post Production</div>
+  </div>
+</div>
 
 <div class="divider"></div>
 
@@ -226,7 +688,7 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
       </div>
       <div class="about-text">
         <p class="sec-tag">Who I Am</p>
-        <h2 class="sec-title">AI Creator.<br/><em>Not Just a Tool User.</em></h2>
+        <h2 class="sec-title" data-split>AI Creator.<br/><em>Not Just a Tool User.</em></h2>
         <p>I'm <strong>Winod</strong> — an AI Content Creator and filmmaker based in Bengaluru. I don't just use AI tools — I <em>direct them</em> like a cinematographer directs a camera.</p>
         <p>From <strong>cinematic AI video ads</strong> to <strong>viral AI reels</strong>, every piece I create blends AI technology with human storytelling to produce content that <em>actually connects</em> with audiences.</p>
         <p>My studio <strong>Winod Infospace</strong> specialises in AI-powered content for brands that want to stand out — daily social content, high-converting ad films and custom AI apps.</p>
@@ -246,16 +708,20 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 <section id="tools" style="background:var(--bg);">
   <div class="sec">
     <p class="sec-tag fade">Powered By</p>
-    <h2 class="sec-title fade">AI Tools I <em>Master</em></h2>
-    <div class="tools-grid fade">
-      <div class="tool-card"><div class="tool-icon">🎬</div><div class="tool-name">GOOGLE FLOW</div><div class="tool-use">AI Video Generation (Veo 3)</div></div>
-      <div class="tool-card"><div class="tool-icon">🖼️</div><div class="tool-name">LEONARDO AI</div><div class="tool-use">AI Image Creation</div></div>
-      <div class="tool-card"><div class="tool-icon">🎙️</div><div class="tool-name">ELEVENLABS</div><div class="tool-use">AI Voice &amp; Audio</div></div>
-      <div class="tool-card"><div class="tool-icon">✍️</div><div class="tool-name">CLAUDE / GPT</div><div class="tool-use">AI Writing &amp; Strategy</div></div>
-      <div class="tool-card"><div class="tool-icon">🎞️</div><div class="tool-name">KLING AI</div><div class="tool-use">AI Video &amp; Animation</div></div>
-      <div class="tool-card"><div class="tool-icon">🌊</div><div class="tool-name">SORA</div><div class="tool-use">AI Cinematic Video</div></div>
-      <div class="tool-card"><div class="tool-icon">🎨</div><div class="tool-name">CANVA AI</div><div class="tool-use">Design &amp; Branding</div></div>
-      <div class="tool-card"><div class="tool-icon">✂️</div><div class="tool-name">CAPCUT / VN</div><div class="tool-use">AI Video Editing</div></div>
+    <h2 class="sec-title fade" data-split>AI Tools I <em>Master</em></h2>
+    <div class="marquee tools-mq third" style="--spd:58s">
+      <div class="marquee-track">
+        <div class="tool-card"><div class="tool-icon">🎬</div><div class="tool-name">GOOGLE FLOW</div><div class="tool-use">AI Video Generation (Veo 3)</div></div><div class="tool-card"><div class="tool-icon">🖼️</div><div class="tool-name">LEONARDO AI</div><div class="tool-use">AI Image Creation</div></div><div class="tool-card"><div class="tool-icon">🎙️</div><div class="tool-name">ELEVENLABS</div><div class="tool-use">AI Voice &amp; Audio</div></div><div class="tool-card"><div class="tool-icon">✍️</div><div class="tool-name">CLAUDE / GPT</div><div class="tool-use">AI Writing &amp; Strategy</div></div>
+        <div class="tool-card" aria-hidden="true"><div class="tool-icon">🎬</div><div class="tool-name">GOOGLE FLOW</div><div class="tool-use">AI Video Generation (Veo 3)</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🖼️</div><div class="tool-name">LEONARDO AI</div><div class="tool-use">AI Image Creation</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🎙️</div><div class="tool-name">ELEVENLABS</div><div class="tool-use">AI Voice &amp; Audio</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">✍️</div><div class="tool-name">CLAUDE / GPT</div><div class="tool-use">AI Writing &amp; Strategy</div></div>
+        <div class="tool-card" aria-hidden="true"><div class="tool-icon">🎬</div><div class="tool-name">GOOGLE FLOW</div><div class="tool-use">AI Video Generation (Veo 3)</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🖼️</div><div class="tool-name">LEONARDO AI</div><div class="tool-use">AI Image Creation</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🎙️</div><div class="tool-name">ELEVENLABS</div><div class="tool-use">AI Voice &amp; Audio</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">✍️</div><div class="tool-name">CLAUDE / GPT</div><div class="tool-use">AI Writing &amp; Strategy</div></div>
+      </div>
+    </div>
+    <div class="marquee tools-mq third rev" style="--spd:70s">
+      <div class="marquee-track">
+        <div class="tool-card"><div class="tool-icon">🎞️</div><div class="tool-name">KLING AI</div><div class="tool-use">AI Video &amp; Animation</div></div><div class="tool-card"><div class="tool-icon">🌊</div><div class="tool-name">SORA</div><div class="tool-use">AI Cinematic Video</div></div><div class="tool-card"><div class="tool-icon">🎨</div><div class="tool-name">CANVA AI</div><div class="tool-use">Design &amp; Branding</div></div><div class="tool-card"><div class="tool-icon">✂️</div><div class="tool-name">CAPCUT / VN</div><div class="tool-use">AI Video Editing</div></div>
+        <div class="tool-card" aria-hidden="true"><div class="tool-icon">🎞️</div><div class="tool-name">KLING AI</div><div class="tool-use">AI Video &amp; Animation</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🌊</div><div class="tool-name">SORA</div><div class="tool-use">AI Cinematic Video</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🎨</div><div class="tool-name">CANVA AI</div><div class="tool-use">Design &amp; Branding</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">✂️</div><div class="tool-name">CAPCUT / VN</div><div class="tool-use">AI Video Editing</div></div>
+        <div class="tool-card" aria-hidden="true"><div class="tool-icon">🎞️</div><div class="tool-name">KLING AI</div><div class="tool-use">AI Video &amp; Animation</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🌊</div><div class="tool-name">SORA</div><div class="tool-use">AI Cinematic Video</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">🎨</div><div class="tool-name">CANVA AI</div><div class="tool-use">Design &amp; Branding</div></div><div class="tool-card" aria-hidden="true"><div class="tool-icon">✂️</div><div class="tool-name">CAPCUT / VN</div><div class="tool-use">AI Video Editing</div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -266,23 +732,23 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 <section id="services" style="background:var(--bg2);">
   <div class="sec">
     <p class="sec-tag fade">What I Offer</p>
-    <h2 class="sec-title fade">AI Services Built<br/>for <em>Your Brand</em></h2>
+    <h2 class="sec-title fade" data-split>AI Services Built<br/>for <em>Your Brand</em></h2>
     <div class="services-grid fade">
-      <div class="srv-card">
+      <div class="srv-card tilt">
         <div class="srv-num">01</div>
         <div class="srv-icon">🎬</div>
         <h3 class="srv-title">AI Video Ads</h3>
         <p class="srv-desc">Cinematic AI-generated video ads that stop the scroll. From product showcases to brand films — fully produced with AI tools and human creative direction.</p>
         <div class="tags"><span class="tag">AI Films</span><span class="tag">Brand Ads</span><span class="tag">Reels</span><span class="tag">Shorts</span></div>
       </div>
-      <div class="srv-card">
+      <div class="srv-card tilt">
         <div class="srv-num">02</div>
         <div class="srv-icon">📱</div>
         <h3 class="srv-title">AI Social Content</h3>
         <p class="srv-desc">Daily AI-powered content for Instagram, YouTube and Facebook. Consistent, high-quality, on-brand reels and posts created using the latest AI technology.</p>
         <div class="tags"><span class="tag">Instagram</span><span class="tag">YouTube</span><span class="tag">Facebook</span><span class="tag">Daily Content</span></div>
       </div>
-      <div class="srv-card">
+      <div class="srv-card tilt">
         <div class="srv-num">03</div>
         <div class="srv-icon">🤖</div>
         <h3 class="srv-title">AI Apps &amp; Tools</h3>
@@ -299,57 +765,57 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 <section id="portfolio" style="background:var(--bg);">
   <div class="sec">
     <p class="sec-tag fade">AI Work</p>
-    <h2 class="sec-title fade">Projects Powered<br/>by <em>AI</em></h2>
+    <h2 class="sec-title fade" data-split>Projects Powered<br/>by <em>AI</em></h2>
     <p class="port-intro fade">Every project was conceived, produced and delivered using AI tools — proving the future of content creation is already here.</p>
     <div class="port-grid fade">
-      <div class="port-card feat" onclick="openVideo('w0k3Gdex3mA')">
+      <div class="port-card feat tilt" onclick="openVideo('w0k3Gdex3mA')">
         <div class="port-img g1">🌿</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">Wellness Brand · Ongoing</div><div class="port-name">30 AI Reels Per Month — Daily Content Series</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('PzRs8jYiaS8')">
+      <div class="port-card tilt" onclick="openVideo('PzRs8jYiaS8')">
         <div class="port-img g2">🎬</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">AI Ad Film</div><div class="port-name">Cinematic Brand Video</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('-grZYnS1vvM')">
+      <div class="port-card tilt" onclick="openVideo('-grZYnS1vvM')">
         <div class="port-img g3">🍽️</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">Maara Resto Bar</div><div class="port-name">Logo Reveal — Brand Identity</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('cKG40Dsq_YM')">
+      <div class="port-card tilt" onclick="openVideo('cKG40Dsq_YM')">
         <div class="port-img g4">🎭</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">Kannada Short Film</div><div class="port-name">AI-Powered Storytelling</div></div>
       </div>
-      <div class="port-card">
+      <div class="port-card tilt">
         <div class="port-img g5">🤖</div>
         <div class="port-ov"><span>View Project</span></div>
         <div class="port-info"><div class="port-client">AI Apps</div><div class="port-name">Custom AI Web Tools</div></div>
       </div>
 
       <!-- VIDEO PROOF CARDS -->
-      <div class="port-card" onclick="openVideo('DS7NPKXC4f0')">
+      <div class="port-card tilt" onclick="openVideo('DS7NPKXC4f0')">
         <div class="port-img g2">📦</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">D2C Brand · Foxden</div><div class="port-name">AI Product Ad</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('OuH3pmGFDTI')">
+      <div class="port-card tilt" onclick="openVideo('OuH3pmGFDTI')">
         <div class="port-img g1">🌿</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">Wellness Brand</div><div class="port-name">AI Reel — Content Series</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('Zp-_0-UUJcM')">
+      <div class="port-card tilt" onclick="openVideo('Zp-_0-UUJcM')">
         <div class="port-img g4">🎨</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">AI Animation</div><div class="port-name">Character-Driven Short</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('npTN-6OEhI0')">
+      <div class="port-card tilt" onclick="openVideo('npTN-6OEhI0')">
         <div class="port-img g3">🍽️</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">F&amp;B · RKR Masala</div><div class="port-name">AI Video Campaign</div></div>
       </div>
-      <div class="port-card" onclick="openVideo('Romq_8zOFxw')">
+      <div class="port-card tilt" onclick="openVideo('Romq_8zOFxw')">
         <div class="port-img g1">💫</div>
         <div class="port-ov"><span>▶ Play Video</span></div>
         <div class="port-info"><div class="port-client">Wellness · Healing</div><div class="port-name">AI Ad Film</div></div>
@@ -374,20 +840,20 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 <section id="websites" style="background:var(--bg2);">
   <div class="sec">
     <p class="sec-tag fade">Web Builds</p>
-    <h2 class="sec-title fade">Websites <em>Developed</em> by Me</h2>
+    <h2 class="sec-title fade" data-split>Websites <em>Developed</em> by Me</h2>
     <p class="port-intro fade">Full-stack builds — from domain setup to CMS to launch — for real clients.</p>
     <div class="port-grid fade">
-      <a href="https://navyadigitalnews.com/" target="_blank" rel="noopener" class="port-card" style="text-decoration:none;">
+      <a href="https://navyadigitalnews.com/" target="_blank" rel="noopener" class="port-card tilt" style="text-decoration:none;">
         <div class="port-img g1">📰</div>
         <div class="port-ov"><span>Visit Site ↗</span></div>
         <div class="port-info"><div class="port-client">Kannada News Portal</div><div class="port-name">navyadigitalnews.com</div></div>
       </a>
-      <a href="https://adamyavahini.in/" target="_blank" rel="noopener" class="port-card" style="text-decoration:none;">
+      <a href="https://adamyavahini.in/" target="_blank" rel="noopener" class="port-card tilt" style="text-decoration:none;">
         <div class="port-img g4">📺</div>
         <div class="port-ov"><span>Visit Site ↗</span></div>
         <div class="port-info"><div class="port-client">Kannada TV Channel</div><div class="port-name">adamyavahini.in</div></div>
       </a>
-      <a href="https://writerbro.co.in/" target="_blank" rel="noopener" class="port-card" style="text-decoration:none;">
+      <a href="https://writerbro.co.in/" target="_blank" rel="noopener" class="port-card tilt" style="text-decoration:none;">
         <div class="port-img g5">✍️</div>
         <div class="port-ov"><span>Visit Site ↗</span></div>
         <div class="port-info"><div class="port-client">Writing Services</div><div class="port-name">writerbro.co.in</div></div>
@@ -402,19 +868,19 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 <section id="testimonials" style="background:var(--bg2);">
   <div class="sec">
     <p class="sec-tag fade">Client Words</p>
-    <h2 class="sec-title fade">What Clients <em>Say</em></h2>
+    <h2 class="sec-title fade" data-split>What Clients <em>Say</em></h2>
     <div class="test-grid fade">
-      <div class="test-card">
+      <div class="test-card tilt">
         <div class="stars">★★★★★</div>
         <p class="test-text">Winod delivers 30 unique AI reels every month. Each concept is completely different and on-brand. The quality and consistency is something we have never experienced before.</p>
         <div class="test-author"><div class="test-av">🌿</div><div><div class="test-name">Wellness Brand Client</div><div class="test-role">Health &amp; Wellness · Bengaluru</div></div></div>
       </div>
-      <div class="test-card">
+      <div class="test-card tilt">
         <div class="stars">★★★★★</div>
         <p class="test-text">The AI ad Winod created looked like it was produced by a premium agency. Our customers could not believe it was AI-generated. Sales enquiries went up immediately after posting.</p>
         <div class="test-author"><div class="test-av">🍽️</div><div><div class="test-name">Restaurant Owner</div><div class="test-role">F&amp;B · Bengaluru</div></div></div>
       </div>
-      <div class="test-card">
+      <div class="test-card tilt">
         <div class="stars">★★★★★</div>
         <p class="test-text">Working with Winod on our AI content strategy was a game changer. He does not just create content — he thinks about what will perform, and the results clearly show it.</p>
         <div class="test-author"><div class="test-av">📈</div><div><div class="test-name">Brand Manager</div><div class="test-role">FMCG · India</div></div></div>
@@ -431,7 +897,7 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
     <div class="contact-grid">
       <div class="contact-text fade">
         <p class="sec-tag">Let's Create</p>
-        <h2 class="sec-title">Ready to Go<br/><em>AI-First?</em></h2>
+        <h2 class="sec-title" data-split>Ready to Go<br/><em>AI-First?</em></h2>
         <p>Got a brand story to tell? A product to launch? An audience to grow? Let's build something extraordinary with AI.</p>
         <a href="tel:9742860933" class="c-link"><div class="c-icon">📞</div><span>+91 97428 60933</span></a>
         <a href="mailto:winodinfospace@gmail.com" class="c-link"><div class="c-icon">✉️</div><span>winodinfospace@gmail.com</span></a>
@@ -464,20 +930,370 @@ footer{background:var(--bg2);padding:36px 6vw;display:flex;justify-content:space
 </footer>
 
 <script>
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
-}, {threshold: 0.1});
-document.querySelectorAll('.fade').forEach(el => obs.observe(el));
+/* ══════════════════════════════════════════════════════════
+   WINOD INFOSPACE — UI INTERACTION LAYER
+   ══════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var FINE = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+  var raf = window.requestAnimationFrame;
+  var heroGrid = $('.hero-grid'), heroBg = $('.hero-bg'), orb1 = $('.orb-1'), orb2 = $('.orb-2');
 
-function openVideo(id){
-  document.getElementById('videoModalFrame').src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
-  document.getElementById('videoModal').classList.add('open');
-}
-function closeVideo(){
-  document.getElementById('videoModal').classList.remove('open');
-  document.getElementById('videoModalFrame').src = '';
-}
-document.addEventListener('keydown', e => { if(e.key === 'Escape') closeVideo(); });
+  /* ─── 0. PRELOADER + BOOT SEQUENCE (declared first so nothing later can block it) ─── */
+  var pl = $('#pl'), booted = false;
+  function boot() {
+    if (booted) return; booted = true;
+    if (pl) { pl.classList.add('done'); setTimeout(function () { if (pl.parentNode) pl.parentNode.removeChild(pl); }, 900); }
+    var hero = $('#hero');
+    if (hero) hero.classList.add('ready');
+    document.body.classList.add('loaded');
+    revealAboveFold();
+  }
+  window.addEventListener('load', function () { setTimeout(boot, RM ? 0 : 500); });
+  setTimeout(boot, RM ? 120 : 2600);          /* hard cap: never hold the page hostage */
+  setTimeout(function () { if (!booted) revealAboveFold(); }, RM ? 200 : 1200);
+
+
+  /* ─── 1. SEC-TAG WRAP (text nodes inside a span so they can be scrambled) ─── */
+  $$('.sec-tag').forEach(function (el) {
+    var txt = el.textContent;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    var s = document.createElement('span'); s.className = 'sc'; s.textContent = txt;
+    el.appendChild(s);
+  });
+
+  /* ─── 2. WORD-SPLIT KINETIC TYPE ─── */
+  $$('[data-split]').forEach(function (el) {
+    if (RM) return;
+    var idx = 0;
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          if (!n.textContent.trim()) return;
+          var parts = n.textContent.split(/(\s+)/);
+          var frag = document.createDocumentFragment();
+          parts.forEach(function (p) {
+            if (!p.trim()) { frag.appendChild(document.createTextNode(p)); return; }
+            var w = document.createElement('span'); w.className = 'w';
+            var i = document.createElement('span'); i.className = 'wi';
+            i.style.setProperty('--i', idx++);
+            i.textContent = p; w.appendChild(i); frag.appendChild(w);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1 && n.tagName === 'EM') {
+          var next = n.nextSibling, parent = n.parentNode;
+          var w2 = document.createElement('span'); w2.className = 'w';
+          var i2 = document.createElement('span'); i2.className = 'wi';
+          i2.style.setProperty('--i', idx++);
+          i2.appendChild(n); w2.appendChild(i2);
+          parent.insertBefore(w2, next);
+        } else if (n.nodeType === 1 && n.tagName !== 'BR') {
+          walk(n);
+        }
+      });
+    })(el);
+  });
+
+  /* ─── 3. SCRAMBLE + COUNT-UP HELPERS ─── */
+  var GLYPH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#@$%/+*';
+  function scramble(el) {
+    if (RM || !el || el.dataset.done) return;
+    el.dataset.done = '1';
+    var final = el.textContent, len = final.length, frame = 0;
+    var id = setInterval(function () {
+      frame++;
+      var out = '';
+      for (var i = 0; i < len; i++) {
+        out += final[i] === ' ' ? ' ' : (i < frame * 0.9 ? final[i] : GLYPH[Math.floor(Math.random() * GLYPH.length)]);
+      }
+      el.textContent = out;
+      if (frame > len * 0.9 + 3) { clearInterval(id); el.textContent = final; }
+    }, 34);
+  }
+  function countUp(el) {
+    if (el.dataset.counted === '1') return;
+    el.dataset.counted = '1';
+    var raw = el.textContent.trim();
+    var m = raw.match(/^([\d.,]+)(.*)$/);
+    if (!m) return;
+    var target = parseFloat(m[1].replace(/,/g, '')), suffix = m[2] || '', t0 = null, dur = RM ? 1 : 1500;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (p < 1) raf(step); else el.textContent = raw;
+    }
+    raf(step);
+  }
+
+  /* ─── 4. STAGGER GRIDS + STARS ─── */
+  $$('.port-grid, .test-grid, .services-grid, .tools-mq').forEach(function (g) {
+    g.classList.add('fade');
+    $$(':scope > *', g).forEach(function (c, i) { c.style.setProperty('--d', ((i % 6) * 90) + 'ms'); });
+  });
+  $$('.stars').forEach(function (s) {
+    var n = s.textContent.replace(/[^★]/g, '').length;
+    s.innerHTML = '';
+    for (var i = 0; i < n; i++) {
+      var b = document.createElement('i'); b.textContent = '★'; b.style.setProperty('--i', i); s.appendChild(b);
+    }
+  });
+
+  /* ─── 5. REVEAL ON SCROLL ─── */
+  function fire(el) {
+    el.classList.add('on');
+    $$('.sec-tag .sc', el).forEach(scramble);
+    $$('.stat-num', el).forEach(countUp);
+  }
+  var hasIO = 'IntersectionObserver' in window;
+  if (hasIO) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        fire(e.target);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    $$('.fade, .sec-title, .sec-tag').forEach(function (el) { io.observe(el); });
+  }
+  function revealAboveFold() {
+    $$('.fade, .sec-title, .sec-tag').forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) fire(el);
+    });
+  }
+  if (!hasIO || RM) $$('.fade, .sec-title, .sec-tag').forEach(fire);
+
+  /* ─── 7. SCROLL PROGRESS + PARALLAX + TO-TOP RING ─── */
+  var spBar = $('#spBar'), toTop = $('#toTop'), ttProg = $('#ttProg'), nav = $('nav');
+  var RING = 138.2, lastY = -1, ticking = false;
+  function onScroll() {
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+    ticking = false;
+    if (y === lastY) return;
+    lastY = y;
+    var h = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    var p = Math.min(1, Math.max(0, y / h));
+    if (spBar) spBar.style.transform = 'scaleX(' + p + ')';
+    if (ttProg) ttProg.style.strokeDashoffset = String(RING * (1 - p));
+    if (toTop) toTop.classList.toggle('show', y > 700);
+    if (nav) nav.classList.toggle('small', y > 60);
+    if (!RM) {
+      if (heroGrid) heroGrid.style.transform = 'translate3d(0,' + (y * 0.16) + 'px,0) scale(' + (1 + Math.min(y, 420) * 0.00017) + ')';
+      if (heroBg) heroBg.style.transform = 'translate3d(0,' + (y * 0.07) + 'px,0)';
+      if (orb1) orb1.style.marginTop = (y * -0.05) + 'px';
+      if (orb2) orb2.style.marginTop = (y * 0.04) + 'px';
+    }
+  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; raf(onScroll); } }, { passive: true });
+  onScroll();
+  if (toTop) toTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); });
+
+  /* ─── 8. TILT + SPOTLIGHT (3D cards) ─── */
+  if (!RM && FINE) {
+    $$('.tilt').forEach(function (card) {
+      var rect = null, tx = 0, ty = 0, running = false;
+      function settle() {
+        tx += (0 - tx) * 0.16; ty += (0 - ty) * 0.16;
+        if (Math.abs(tx) < 0.06 && Math.abs(ty) < 0.06) {
+          running = false; card.style.transform = ''; card.style.transition = ''; return;
+        }
+        card.style.transform = 'perspective(900px) rotateX(' + ty.toFixed(2) + 'deg) rotateY(' + tx.toFixed(2) + 'deg)';
+        raf(settle);
+      }
+      card.addEventListener('pointerenter', function () {
+        rect = card.getBoundingClientRect();
+        card.style.transition = 'transform .4s cubic-bezier(.22,1,.36,1)';
+      });
+      card.addEventListener('pointermove', function (e) {
+        if (!rect) rect = card.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        var px = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+        var py = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
+        card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+        card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+        tx = (px - 0.5) * 9; ty = -(py - 0.5) * 9;
+        card.style.transform = 'perspective(900px) rotateX(' + ty.toFixed(2) + 'deg) rotateY(' + tx.toFixed(2) + 'deg)';
+      });
+      card.addEventListener('pointerleave', function () {
+        rect = null; tx = 0; ty = 0;
+        if (!running) { running = true; raf(settle); }
+      });
+    });
+  }
+
+  /* ─── 9. AMBIENT PARTICLE CANVAS (hero) ─── */
+  (function () {
+    var cv = $('#fx');
+    if (!cv || RM) { if (cv) cv.style.display = 'none'; return; }
+    var ctx = cv.getContext && cv.getContext('2d');
+    if (!ctx) { cv.style.display = 'none'; return; }
+    var W = 0, H = 0, DPR = Math.min(2, window.devicePixelRatio || 1);
+    var dots = [], mouse = { x: -9999, y: -9999 }, alive = true;
+    function size() {
+      var r = cv.parentNode.getBoundingClientRect();
+      W = r.width; H = r.height;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      var n = Math.round(Math.min(76, Math.max(24, W / 21)));
+      dots = [];
+      for (var i = 0; i < n; i++) dots.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+        r: Math.random() * 1.5 + 0.5, g: Math.random() > 0.45
+      });
+    }
+    function tick() {
+      if (!alive) return;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < dots.length; i++) {
+        var d = dots[i];
+        d.x += d.vx; d.y += d.vy;
+        if (d.x < -20) d.x = W + 20; else if (d.x > W + 20) d.x = -20;
+        if (d.y < -20) d.y = H + 20; else if (d.y > H + 20) d.y = -20;
+        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        if (dist < 130) { d.x += dx / dist * 0.5; d.y += dy / dist * 0.5; }
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, 6.2832);
+        ctx.fillStyle = d.g ? 'rgba(201,168,76,0.55)' : 'rgba(240,237,232,0.2)';
+        ctx.fill();
+        for (var j = i + 1; j < dots.length; j++) {
+          var o = dots[j], lx = d.x - o.x, ly = d.y - o.y, l2 = lx * lx + ly * ly;
+          if (l2 < 20000) {
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y); ctx.lineTo(o.x, o.y);
+            ctx.strokeStyle = 'rgba(201,168,76,' + (0.11 * (1 - l2 / 20000)).toFixed(3) + ')';
+            ctx.lineWidth = 0.6; ctx.stroke();
+          }
+        }
+      }
+      raf(tick);
+    }
+    size(); tick();
+    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(size, 180); });
+    window.addEventListener('pointermove', function (e) {
+      var r = cv.getBoundingClientRect();
+      mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    }, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      alive = !document.hidden; if (alive) raf(tick);
+    });
+  })();
+
+  /* ─── 10. CUSTOM CURSOR + AMBIENT GLOW ─── */
+  if (!RM && FINE) {
+    var dot = $('#cDot'), ring = $('#cRing'), glow = $('#glow');
+    if (dot && ring) {
+      document.documentElement.classList.add('cursor-on');
+      var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+      var rx = mx, ry = my, gx = mx, gy = my;
+      window.addEventListener('pointermove', function (e) {
+        mx = e.clientX; my = e.clientY;
+        dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+        var hot = e.target && e.target.closest &&
+          e.target.closest('a,button,.port-card,.tool-card,.srv-card,.test-card,input,textarea,.burger');
+        ring.classList.toggle('big', !!hot);
+        dot.classList.toggle('big', !!hot);
+      }, { passive: true });
+      (function loop() {
+        rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
+        gx += (mx - gx) * 0.055; gy += (my - gy) * 0.055;
+        ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+        if (glow) glow.style.transform = 'translate3d(' + gx + 'px,' + gy + 'px,0) translate(-50%,-50%)';
+        raf(loop);
+      })();
+      document.addEventListener('mouseleave', function () { document.documentElement.classList.remove('cursor-on'); });
+      document.addEventListener('mouseenter', function () { document.documentElement.classList.add('cursor-on'); });
+    }
+  }
+
+  /* ─── 11. SCROLL-SPY NAV ─── */
+  var navLinks = $$('.nav-links a[href^="#"]');
+  var secs = navLinks.map(function (a) { return $(a.getAttribute('href')); }).filter(Boolean);
+  if (secs.length && hasIO) {
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        navLinks.forEach(function (a) { a.classList.toggle('current', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    secs.forEach(function (s) { spy.observe(s); });
+  }
+
+  /* ─── 12. MOBILE MENU ─── */
+  var burger = $('#burger'), mmenu = $('#mMenu');
+  function lockBody(on) {
+    var root = document.documentElement;
+    if (on) {
+      var sbw = Math.max(0, window.innerWidth - root.clientWidth);
+      root.style.setProperty('--sbw', sbw + 'px');
+      document.body.classList.add('lock');
+    } else {
+      document.body.classList.remove('lock');
+      root.style.setProperty('--sbw', '0px');
+    }
+  }
+  function setMenu(open) {
+    if (!burger || !mmenu) return;
+    burger.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    mmenu.classList.toggle('open', open);
+    lockBody(open);
+  }
+  if (burger) {
+    burger.addEventListener('click', function () { setMenu(!mmenu.classList.contains('open')); });
+    $$('a', mmenu).forEach(function (a, i) {
+      a.style.setProperty('--d', (140 + i * 55) + 'ms');
+      a.addEventListener('click', function () { setMenu(false); });
+    });
+    window.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+    window.addEventListener('resize', function () { if (window.innerWidth > 1080) setMenu(false); });
+  }
+
+  /* ─── 13. VIDEO MODAL (focus-safe) ─── */
+  var modal = $('#videoModal'), frame = $('#videoModalFrame'), lastFocus = null;
+  window.openVideo = function (id) {
+    if (!modal || !frame) return;
+    lastFocus = document.activeElement;
+    frame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1';
+    modal.classList.add('open');
+    lockBody(true);
+    var c = $('.video-modal-close', modal);
+    if (c) setTimeout(function () { c.focus(); }, 60);
+  };
+  window.closeVideo = function () {
+    if (!modal) return;
+    modal.classList.remove('open');
+    lockBody(false);
+    if (frame) frame.src = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') window.closeVideo(); });
+
+  /* ─── 14. SMOOTH ANCHORS + KEYBOARD ACCESS ─── */
+  $$('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      var id = a.getAttribute('href');
+      if (!id || id.length < 2) return;
+      var t = $(id);
+      if (!t) return;
+      ev.preventDefault();
+      var top = t.getBoundingClientRect().top + window.pageYOffset - 76;
+      window.scrollTo({ top: top, behavior: RM ? 'auto' : 'smooth' });
+      if (history.replaceState) history.replaceState(null, '', id);
+    });
+  });
+  $$('.port-card[onclick]').forEach(function (c) {
+    c.setAttribute('tabindex', '0');
+    c.setAttribute('role', 'button');
+    c.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+    });
+  });
+})();
 </script>
 </body>
 </html>
